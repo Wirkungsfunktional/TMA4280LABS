@@ -40,9 +40,12 @@ void MPI_execute<FUNC>::run() {
 
         for (int i=1; i<world_size; i++) {
             double v[reduced_size];
+
+            #pragma omp parallel for
             for (int k=0;k<reduced_size;k++) {
                 v[k] = FUNC::eval( (double) (reduced_size*i + (k+1)) );
             }
+
             MPI_Send(v, reduced_size, MPI_DOUBLE, i, 0, MPI_COMM_WORLD);
         }
         double sum = 0;
@@ -50,6 +53,7 @@ void MPI_execute<FUNC>::run() {
         for (int k=1;k<=reduced_size;k++) {
             sum += FUNC::eval( (double) ( k ) );
         }
+
         for (int i=1; i<world_size; i++) {
             double erg;
             MPI_Recv(&erg, 1, MPI_DOUBLE, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
@@ -63,6 +67,8 @@ void MPI_execute<FUNC>::run() {
         double v[reduced_size];
         double sum=0;
         MPI_Recv(v, reduced_size, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+        #pragma omp parallel for reduction (+:sum)
         for (int k=0;k<reduced_size;k++) {
             sum += v[k];
         }
