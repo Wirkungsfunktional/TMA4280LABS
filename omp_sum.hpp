@@ -21,6 +21,8 @@ public:
 
 template<class FUNC>
 void OMP_execute<FUNC>::run() {
+    double ta, te;
+    ta = omp_get_wtime();
     double v[sys_size];
 
     #pragma omp parallel for
@@ -34,8 +36,11 @@ void OMP_execute<FUNC>::run() {
     for (int i=0; i<sys_size; i++) {
         erg += v[i];
     }
-
-    std::cout << FUNC::finalize(erg) << "\n";
+    double pi = FUNC::finalize(erg);
+    te = omp_get_wtime();
+    std::cout   << "Pi: " << pi  << "\n"
+                << "Err: " << std::abs(M_PI - pi) << "\n"
+                << "Time: " << te - ta << "\n";
 }
 
 

@@ -1,11 +1,8 @@
-
 #include <iostream>
 #include <sstream>
 
 #include "../serial_sum.hpp"
-
-
-
+#include "../mpi_sum.hpp"
 
 
 
@@ -20,11 +17,8 @@ int main(int argc, char* argv[])
         if (!(ss >> x))
             std::cerr << "Invalid number " << argv[1] << '\n';
     }
-
-    my_sum<mach, double> s = my_sum<mach, double>();
-    std::cout << s.eval(x) << "\n";
-
-
+    MPI_execute<zeta> mpi_op = MPI_execute<zeta>(x);
+    mpi_op.run_reduce_sum();
 
     return 0;
 }

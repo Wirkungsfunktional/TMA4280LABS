@@ -11,7 +11,16 @@
 
 int main(int argc, char* argv[])
 {
-    OMP_execute<mach> omp_op = OMP_execute<mach>(1000);
+    int x;
+    if (argc < 2) {
+        std::cout << "Insert number: " << "\n";
+        std::cin >> x;
+    } else {
+        std::istringstream ss(argv[1]);
+        if (!(ss >> x))
+            std::cerr << "Invalid number " << argv[1] << '\n';
+    }
+    OMP_execute<mach> omp_op = OMP_execute<mach>(x);
     omp_op.run();
 
     return 0;

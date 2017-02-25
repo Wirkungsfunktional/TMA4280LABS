@@ -7,6 +7,8 @@
 #include <math.h>
 #include <mpi.h>
 #include <omp.h>
+#include <cassert>
+
 
 
 template<class FUNC>
@@ -28,7 +30,6 @@ public:
 
 template<class FUNC>
 void MPI_execute<FUNC>::run() {
-
     MPI_Init(NULL, NULL);
     int world_rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
@@ -36,7 +37,13 @@ void MPI_execute<FUNC>::run() {
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
     int reduced_size = sys_size / world_size;
 
+    assert( ((world_size != 0) && ((world_size & (~world_size + 1)) == world_size)) != 0 );
+
+
     if (world_rank==0) {
+        double t1, t2;
+        t1 = MPI_Wtime();
+
 
         for (int i=1; i<world_size; i++) {
             double v[reduced_size];
@@ -59,7 +66,11 @@ void MPI_execute<FUNC>::run() {
             MPI_Recv(&erg, 1, MPI_DOUBLE, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             sum += erg;
         }
-        std::cout << FUNC::finalize(sum) << "\n";
+        double pi = FUNC::finalize(sum);
+        t2 = MPI_Wtime();
+        std::cout   << "Pi: " << pi  << "\n"
+                    << "Err: " << std::abs(M_PI - pi) << "\n"
+                    << "Time: " << t2 - t1 << "\n";
 
 
 
@@ -128,15 +139,20 @@ void MPI_execute<FUNC>::run_reduce_sum() {
     int reduced_size = sys_size / size;
     double erg;
     double final_erg;
+    double t1 = MPI_Wtime();
 
     for (int i=0; i<reduced_size; i++) {
         erg += FUNC::eval( (double) (reduced_size*rank + (i+1)) );
     }
-    //MPI::COMM_WORLD.Reduce(&erg, &final_erg, 1, MPI::DOUBLE, MPI::SUM, 0);
-    final_erg = rec(size, rank, erg, size/2);
-    //if (rank==0) {
-    std::cout << "Rank " << rank << ": " << FUNC::finalize(final_erg) << "\n";
-    //}
+    MPI::COMM_WORLD.Reduce(&erg, &final_erg, 1, MPI::DOUBLE, MPI::SUM, 0);
+    if (rank==0) {
+        double pi = FUNC::finalize(final_erg);
+        double t2 = MPI_Wtime();
+        std::cout   << "Pi: " << pi  << "\n"
+                    << "Err: " << std::abs(M_PI - pi) << "\n"
+                    << "Time: " << t2 - t1 << "\n";
+
+    }
     MPI::Finalize();
 }
 

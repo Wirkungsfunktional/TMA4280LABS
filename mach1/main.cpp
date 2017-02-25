@@ -11,9 +11,17 @@
 
 int main(int argc, char* argv[])
 {
-    MPI_execute<mach> mpi_op = MPI_execute<mach>(1000);
+    int x;
+    if (argc < 2) {
+        std::cout << "Insert number: " << "\n";
+        std::cin >> x;
+    } else {
+        std::istringstream ss(argv[1]);
+        if (!(ss >> x))
+            std::cerr << "Invalid number " << argv[1] << '\n';
+    }
+    MPI_execute<mach> mpi_op = MPI_execute<mach>(x);
     mpi_op.run();
-    //mpi_op.run_reduce_sum();
 
     return 0;
 }

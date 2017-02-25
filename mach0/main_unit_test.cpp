@@ -12,7 +12,7 @@
 int main(int argc, char* argv[])
 {
     my_sum<mach, double> s = my_sum<mach, double>();
-    std::cout << s.unit_test() << "\n";
+    s.unit_test();
 
     return 0;
 }

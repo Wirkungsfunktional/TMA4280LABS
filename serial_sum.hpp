@@ -5,6 +5,7 @@
 #include <cmath>
 #include <math.h>
 #include <omp.h>
+#include <fstream>
 
 
 struct zeta
@@ -43,7 +44,7 @@ public:
         erg = T();
     }
     T eval(int n);
-    T unit_test();
+    void unit_test();
     void verification_test();
 
 private:
@@ -61,17 +62,26 @@ T my_sum<FUNC, T>::eval(int n) {
 }
 
 template <class FUNC, typename T>
-T my_sum<FUNC, T>::unit_test() {
-    return eval(3);
+void my_sum<FUNC, T>::unit_test() {
+    std::cout << "Error is: " << M_PI - eval(3) << "\n";
 }
 
 template <class FUNC, typename T>
 void my_sum<FUNC, T>::verification_test() {
-    T err[24];
+    T err;
+    double ta, te;
+    int n;
+    std::ofstream myfile;
+    myfile.open("Results.txt");
+    myfile << "N \t\t err \t\t t \n";
     for (int i=1; i<=24; i++) {
-        err[i] = M_PI - eval(1 << i);
-        std::cout << err[i] << "\n";
+        ta = omp_get_wtime();
+        n = 1 << i;
+        err = std::abs(M_PI - eval(n));
+        te = omp_get_wtime();
+        myfile << n << "\t\t" << err << "\t\t" << te - ta << "\n";
     }
+    myfile.close();
 }
 
 
