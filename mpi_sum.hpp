@@ -145,7 +145,7 @@ void MPI_execute<FUNC>::run_reduce_sum() {
     for (int i=0; i<reduced_size; i++) {
         erg += FUNC::eval( (double) (reduced_size*rank + (i+1)) );
     }
-    MPI_Reduce(&erg, &final_erg, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Reduce(&erg, &final_erg, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
     if (rank==0) {
         double pi = FUNC::finalize(final_erg);
         double t2 = MPI_Wtime();
