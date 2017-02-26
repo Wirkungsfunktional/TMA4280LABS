@@ -10,6 +10,5 @@ utest:
 	./main_unit_test
 
 vtest:
-	$(CC) -o main_verification_test main_verification_test.cpp
+	$(CC) -o main_verification_test main_verification_test.cpp -fopenmp
 	./main_verification_test
-

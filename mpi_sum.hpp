@@ -132,10 +132,11 @@ double collect(int N, double x) {
 
 template<class FUNC>
 void MPI_execute<FUNC>::run_reduce_sum() {
+    MPI_Init(NULL, NULL);
+    int size, rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-    MPI::Init();
-    int size = MPI::COMM_WORLD.Get_size();
-    int rank = MPI::COMM_WORLD.Get_rank();
     int reduced_size = sys_size / size;
     double erg;
     double final_erg;
@@ -144,7 +145,7 @@ void MPI_execute<FUNC>::run_reduce_sum() {
     for (int i=0; i<reduced_size; i++) {
         erg += FUNC::eval( (double) (reduced_size*rank + (i+1)) );
     }
-    MPI::COMM_WORLD.Reduce(&erg, &final_erg, 1, MPI::DOUBLE, MPI::SUM, 0);
+    MPI_Reduce(&erg, &final_erg, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
     if (rank==0) {
         double pi = FUNC::finalize(final_erg);
         double t2 = MPI_Wtime();
@@ -153,7 +154,7 @@ void MPI_execute<FUNC>::run_reduce_sum() {
                     << "Time: " << t2 - t1 << "\n";
 
     }
-    MPI::Finalize();
+    MPI_Finalize();
 }
 
 

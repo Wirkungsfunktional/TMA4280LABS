@@ -9,4 +9,4 @@
 cd $PBS_O_WORKDIR
 load openmpi
 
-mpirun -n 16 ./main
+mpirun ./main 10000
