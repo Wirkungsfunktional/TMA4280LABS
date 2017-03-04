@@ -16,10 +16,16 @@ class MPI_execute {
 
 private:
     int sys_size;
+    int reduced_size;
+    int world_size, world_rank;
 
 public:
-    explicit MPI_execute(int N){
+    explicit MPI_execute(int N, int size, int rank){
         sys_size = N;
+        world_size = size;
+        world_rank = rank;
+        reduced_size = sys_size / world_size;
+        assert( ((world_size != 0) && ((world_size & (~world_size + 1)) == world_size)) != 0 );
     }
     void run();
     void run_reduce_sum();
@@ -30,20 +36,11 @@ public:
 
 template<class FUNC>
 void MPI_execute<FUNC>::run() {
-    MPI_Init(NULL, NULL);
-    int world_rank;
-    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-    int world_size;
-    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-    int reduced_size = sys_size / world_size;
-
-    assert( ((world_size != 0) && ((world_size & (~world_size + 1)) == world_size)) != 0 );
 
 
     if (world_rank==0) {
         double t1, t2;
         t1 = MPI_Wtime();
-
 
         for (int i=1; i<world_size; i++) {
             double v[reduced_size];
@@ -85,7 +82,7 @@ void MPI_execute<FUNC>::run() {
         }
         MPI_Send(&sum, 1, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
     }
-    MPI_Finalize();
+
 }
 
 double rec(int N, int rank, double z, int pivot) {
