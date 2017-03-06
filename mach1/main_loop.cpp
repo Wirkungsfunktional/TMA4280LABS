@@ -26,8 +26,15 @@ int main(int argc, char* argv[])
     int world_size;
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
-    MPI_execute<mach, 0> mpi_op(x, world_size, world_rank);
+
+    MPI_execute<mach, 1000> mpi_op(x, world_size, world_rank);
+
+    double t1, t2;
+    t1 = MPI_Wtime();
     mpi_op.run();
+    t2 = MPI_Wtime();
+    if (world_rank == 0)
+        std::cout  << "Time: " << (t2 - t1) << "\n";
 
     MPI_Finalize();
 

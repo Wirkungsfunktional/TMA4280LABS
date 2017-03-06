@@ -11,7 +11,7 @@
 
 
 
-template<class FUNC>
+template<class FUNC, int LOOP>
 class MPI_execute {
 
 private:
@@ -33,8 +33,8 @@ public:
 };
 
 
-template<class FUNC>
-void MPI_execute<FUNC>::run() {
+template<class FUNC, int LOOP>
+void MPI_execute<FUNC, LOOP>::run() {
 
     double v[reduced_size];
     double sum=0;
@@ -54,8 +54,16 @@ void MPI_execute<FUNC>::run() {
 
             MPI_Send(v, reduced_size, MPI_DOUBLE, i, 0, MPI_COMM_WORLD);
         }
+        #pragma omp parallel for
         for (int k=1;k<=reduced_size;k++) {
-            sum += FUNC::eval( (double) ( k ) );
+            v[k-1] = FUNC::eval( (double) ( k ) );
+        }
+
+        for (int i=0;i<LOOP;i++) {
+            #pragma omp parallel for reduction (+:sum)
+            for (int k=0;k<reduced_size;k++) {
+                sum += v[k];
+            }
         }
         double erg;
         for (int i=1; i<world_size; i++) {
@@ -64,19 +72,22 @@ void MPI_execute<FUNC>::run() {
         }
         double pi = FUNC::finalize(sum);
         t2 = MPI_Wtime();
-        std::cout   << "Pi: " << pi  << "\n"
-                    << "Err: " << std::abs(M_PI - pi) << "\n"
-                    << "Time: " << t2 - t1 << "\n";
+        if (!LOOP) {
+            std::cout   << "Pi: " << pi  << "\n"
+                        << "Err: " << std::abs(M_PI - pi) << "\n"
+                        << "Time: " << t2 - t1 << "\n";
+        }
 
 
 
     } else {
 
         MPI_Recv(v, reduced_size, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-        #pragma omp parallel for reduction (+:sum)
-        for (int k=0;k<reduced_size;k++) {
-            sum += v[k];
+        for (int i=0;i<LOOP;i++) {
+            #pragma omp parallel for reduction (+:sum)
+            for (int k=0;k<reduced_size;k++) {
+                sum += v[k];
+            }
         }
         MPI_Send(&sum, 1, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
     }
@@ -85,8 +96,8 @@ void MPI_execute<FUNC>::run() {
 
 
 
-template<class FUNC>
-void MPI_execute<FUNC>::run_reduce_sum() {
+template<class FUNC, int LOOP>
+void MPI_execute<FUNC, LOOP>::run_reduce_sum() {
     MPI_Init(NULL, NULL);
     int size, rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
