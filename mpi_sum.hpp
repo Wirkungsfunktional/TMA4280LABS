@@ -29,7 +29,6 @@ public:
     }
     void run();
     void run_reduce_sum();
-    void run_reduce_sum_rec();
 
 };
 
@@ -37,13 +36,16 @@ public:
 template<class FUNC>
 void MPI_execute<FUNC>::run() {
 
+    double v[reduced_size];
+    double sum=0;
+
 
     if (world_rank==0) {
         double t1, t2;
         t1 = MPI_Wtime();
 
         for (int i=1; i<world_size; i++) {
-            double v[reduced_size];
+
 
             #pragma omp parallel for
             for (int k=0;k<reduced_size;k++) {
@@ -52,14 +54,11 @@ void MPI_execute<FUNC>::run() {
 
             MPI_Send(v, reduced_size, MPI_DOUBLE, i, 0, MPI_COMM_WORLD);
         }
-        double sum = 0;
-
         for (int k=1;k<=reduced_size;k++) {
             sum += FUNC::eval( (double) ( k ) );
         }
-
+        double erg;
         for (int i=1; i<world_size; i++) {
-            double erg;
             MPI_Recv(&erg, 1, MPI_DOUBLE, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             sum += erg;
         }
@@ -72,8 +71,7 @@ void MPI_execute<FUNC>::run() {
 
 
     } else {
-        double v[reduced_size];
-        double sum=0;
+
         MPI_Recv(v, reduced_size, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
         #pragma omp parallel for reduction (+:sum)
@@ -84,46 +82,6 @@ void MPI_execute<FUNC>::run() {
     }
 
 }
-
-double rec(int N, int rank, double z, int pivot) {
-    if (N==1) {
-        return z;
-    }
-    if (rank < pivot) {
-        double x = rec(N/2, rank, z, pivot/2);
-        double erg;
-        std::cout << rank << " send to " << rank + N/2 << "\n";
-        MPI_Send(&x, 1, MPI_DOUBLE, rank + N/2, 0, MPI_COMM_WORLD);
-        MPI_Recv(&erg, 1, MPI_DOUBLE, rank + N/2, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        return x + erg;
-    } else {
-        double x = rec(N/2, rank, z, pivot + pivot/2 - 1);
-        double erg;
-        std::cout << rank << " send to " << rank - N/2 << "\n";
-        MPI_Send(&x, 1, MPI_DOUBLE, rank - N/2, 0, MPI_COMM_WORLD);
-        MPI_Recv(&erg, 1, MPI_DOUBLE, rank - N/2, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        return x + erg;
-    }
-}
-/*
-double collect(int N, double x) {
-    int deepth = get_depth(N);
-    double erg=x;
-    double z;
-    for (int i=1; i<=deepth; i++) {
-        if (rank % 2 == 0) {
-            MPI_Send(&erg, 1, MPI_DOUBLE, rank + pow(2, i-1), 0, MPI_COMM_WORLD);
-            MPI_Recv(&z, 1, MPI_DOUBLE, rank + pow(2, i-1), 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            erg += z;
-        } else {
-            MPI_Send(&erg, 1, MPI_DOUBLE, rank - pow(2, i-1), 0, MPI_COMM_WORLD);
-            MPI_Recv(&z, 1, MPI_DOUBLE, rank - pow(2, i-1), 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            erg += z;
-        }
-    }
-
-}*/
-
 
 
 
