@@ -27,8 +27,8 @@ int main(int argc, char* argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
     int world_size;
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-    
-    MPI_execute<zeta> mpi_op(x, world_size, world_rank);
+
+    MPI_execute<zeta, 0> mpi_op(x, world_size, world_rank);
     mpi_op.run();
 
     MPI_Finalize();

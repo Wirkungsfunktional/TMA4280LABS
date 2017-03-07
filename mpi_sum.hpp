@@ -4,10 +4,15 @@
 
 #define _USE_MATH_DEFINES
 #include <cmath>
+#include <iostream>
+#include <iomanip>
 #include <math.h>
 #include <mpi.h>
 #include <omp.h>
 #include <cassert>
+
+
+
 
 
 
@@ -59,7 +64,7 @@ void MPI_execute<FUNC, LOOP>::run() {
             v[k-1] = FUNC::eval( (double) ( k ) );
         }
 
-        for (int i=0;i<LOOP;i++) {
+        for (int i=0;i<=LOOP;i++) {
             #pragma omp parallel for reduction (+:sum)
             for (int k=0;k<reduced_size;k++) {
                 sum += v[k];
@@ -73,7 +78,7 @@ void MPI_execute<FUNC, LOOP>::run() {
         double pi = FUNC::finalize(sum);
         t2 = MPI_Wtime();
         if (!LOOP) {
-            std::cout   << "Pi: " << pi  << "\n"
+            std::cout   << "Pi: " << std::setprecision(15) << pi  << "\n"
                         << "Err: " << std::abs(M_PI - pi) << "\n"
                         << "Time: " << t2 - t1 << "\n";
         }
@@ -83,7 +88,7 @@ void MPI_execute<FUNC, LOOP>::run() {
     } else {
 
         MPI_Recv(v, reduced_size, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        for (int i=0;i<LOOP;i++) {
+        for (int i=0;i<=LOOP;i++) {
             #pragma omp parallel for reduction (+:sum)
             for (int k=0;k<reduced_size;k++) {
                 sum += v[k];
@@ -98,29 +103,25 @@ void MPI_execute<FUNC, LOOP>::run() {
 
 template<class FUNC, int LOOP>
 void MPI_execute<FUNC, LOOP>::run_reduce_sum() {
-    MPI_Init(NULL, NULL);
-    int size, rank;
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-    int reduced_size = sys_size / size;
     double erg;
     double final_erg;
     double t1 = MPI_Wtime();
 
     for (int i=0; i<reduced_size; i++) {
-        erg += FUNC::eval( (double) (reduced_size*rank + (i+1)) );
+        erg += FUNC::eval( (double) (reduced_size*world_rank + (i+1)) );
     }
     MPI_Reduce(&erg, &final_erg, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-    if (rank==0) {
+    if (world_rank==0) {
         double pi = FUNC::finalize(final_erg);
         double t2 = MPI_Wtime();
-        std::cout   << "Pi: " << pi  << "\n"
+        std::cout   << "Pi: " << std::setprecision(15) << pi  << "\n"
                     << "Err: " << std::abs(M_PI - pi) << "\n"
                     << "Time: " << t2 - t1 << "\n";
 
     }
-    MPI_Finalize();
+
+
 }
 
 

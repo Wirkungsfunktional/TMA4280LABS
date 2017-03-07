@@ -5,6 +5,8 @@
 #include <cmath>
 #include <math.h>
 #include <omp.h>
+#include <iostream>
+#include <iomanip>
 
 template<class FUNC>
 class OMP_execute {
@@ -38,7 +40,7 @@ void OMP_execute<FUNC>::run() {
     }
     double pi = FUNC::finalize(erg);
     te = omp_get_wtime();
-    std::cout   << "Pi: " << pi  << "\n"
+    std::cout    << "Pi1: " << std::setprecision(15)<< pi  << "\n"
                 << "Err: " << std::abs(M_PI - pi) << "\n"
                 << "Time: " << te - ta << "\n";
 }
