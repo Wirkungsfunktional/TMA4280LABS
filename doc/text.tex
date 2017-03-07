@@ -15,7 +15,7 @@
 
 \section{Introduction}
 
-Aim of the Project is to implement an algorithm to sum a series in a serial way and in parallel by using MPI and OpenMP. The exact tasks and further specifications can be found in \cite{}. 
+Aim of the Project is to implement an algorithm to sum a series in a serial way and in parallel by using MPI and OpenMP. The exact tasks and further specifications can be found in Project description. 
 
 
 
@@ -38,7 +38,21 @@ It is task to implement a serial method to find the solution of two sums. Theref
 
 The implementation should be done in the way, that we allocate a vector, fill it with the values of the terms and distribute the to the processes. This is not really a suitable solution to the problem in the way that we allocate an possibly big array, but we need the values only once. The summation can be done immediately after evaluating the terms, but however, the task is written to practice the MPI mechanism. To avoid the allocation of a big array in the root process, we decided to allocate only a array of the size of the distributed array and fill this in the loop before sending. This leads to a slight deparallelisation and is only suggestive if the filling process takes not to much time. After sending the distributed array every process receive its part and sum over it. Afterwards every partial result will be returned to the root process and summed together. 
 
-The program measure the wall time by using the MPI wall time function. As we are interested in the execution time of the program we start the measurement in the root process and stop it there after all processes have returned their results and added together. It turns out that in reason of the restricted memory size the expected speed up do not occur. The loop over the vector elements is faster than the communication between the processes. My jobs at the supercomputer lille were not accepted and remains all in the queue, so I was constrained to use my own computer. Therefore the number of processes is restricted to $4$. Nevertheless Tab.~\ref{} shows the obtained speed up for the zeta series.
+The program measure the wall time by using the MPI wall time function. As we are interested in the execution time of the program we start the measurement in the root process and stop it there after all processes have returned their results and added together. It turns out that in reason of the restricted memory size the expected speed up do not occur. The loop over the vector elements is faster than the communication between the processes. My jobs at the supercomputer lille were not accepted and remains all in the queue, so I was constrained to use my own computer. Therefore the number of processes is restricted to $4$. Nevertheless Tab.~\ref{tab:speed_up1_mpi}\begin{table}
+\centering
+    \begin{tabular}{| l | l | l | l | l |}
+    
+    \hline
+    P & $N = 10^3$ & $N = 10^4$ & $N = 10^5$ & $N = 10^6$\\  \hline
+	$1$ & $1 \rightarrow 8.82 \cdot 10^{-6} s$ & $1 \rightarrow 185.9 \cdot 10^{-6} s$ & $1 \rightarrow 9.84 \cdot 10^{-6} s$ & $1 \rightarrow 1.10 \cdot 10^{-3} s$\\    
+    $2$ & $0.25$ & $1.37$ & $1.13$ &$0.97$ \\
+    $4$ & $0.15$ & $0.89$ & $0.87$ &$0.78$ \\
+    \hline
+    
+    \end{tabular}
+    \caption{The Speed up in dependence of the system size $N$ and the number of processes $P$. Due to the nature of the problem a good speed up do not occur.}
+    \label{tab:speed_up1_mpi}
+\end{table} shows the obtained speed up for the zeta series.
 To test whether our program works in parallel or not, we added a loop to the critical part, the sum over the vector, in each process. This means we do this critical part many times, instead of once. This leads to a longer calculation time. This version shows an expected speed up behaviour, see Tab.~\ref{tab:speed_up2}.\begin{table}
 \centering
     \begin{tabular}{| l | l | l |}
@@ -51,25 +65,11 @@ To test whether our program works in parallel or not, we added a loop to the cri
     \hline
     
     \end{tabular}
-    \caption{Bla}
+    \caption{The speed up for the modified system, where the sum over the vector is done multiple. We observe a speed up, but the difference from $2$ to $4$ processes is small. Due is that the processor is a dual core with hyperthreading. So we have only $2$ physical processes.}
     \label{tab:speed_up2}
 \end{table}
 
-\begin{table}
-\centering
-    \begin{tabular}{| l | l | l | l | l |}
-    
-    \hline
-    P & $N = 10^3$ & $N = 10^4$ & $N = 10^5$ & $N = 10^6$\\  \hline
-	$1$ & $1 \rightarrow 8.82 \cdot 10^{-6} s$ & $1 \rightarrow 185.9 \cdot 10^{-6} s$ & $1 \rightarrow 9.84 \cdot 10^{-6} s$ & $1 \rightarrow 1.10 \cdot 10^{-3} s$\\    
-    $2$ & $0.25$ & $1.37$ & $1.13$ &$0.97$ \\
-    $4$ & $0.15$ & $0.89$ & $0.87$ &$0.78$ \\
-    \hline
-    
-    \end{tabular}
-    \caption{Bla}
-    \label{tab:speed_up1_mpi}
-\end{table}
+
 
 
 We can not expect, that the result of the MPI implementation is completely the same as for the serial implementation. There we add a small number to a number of a much higher magnitude. Due to floating number calculation the small number will be seen as zero. In the MPI implementation we calculate local all small numbers of the same magnitude, so the reach possibly a higher magnitude and add this partial sums afterwards. Therefore this result can be more precise, but in case of the mach series, which converge fast it is dangerous, because we add a lot of terms which are under the machine precession and not reliable. However we found for the zeta series small deviation of the error in dependence on the number of processes, see Tab.~\ref{tab:error_dev}.
@@ -86,7 +86,7 @@ We can not expect, that the result of the MPI implementation is completely the s
     \hline
     
     \end{tabular}
-    \caption{Bla}
+    \caption{We observe small fluctuations of the error for $N = 1600$. These are results of different summations over the terms.}
     \label{tab:error_dev}
 \end{table}
 
@@ -109,7 +109,7 @@ We use OpenMP in the way the we parallize the loop which fills the vector. This 
     \hline
     
     \end{tabular}
-    \caption{Bla}
+    \caption{The speed up for the OMP implementation. All results have a big fluctuation due to the short computing time. Other hidden processes on the computer interfere.}
     \label{tab:speed_up1_omp}
 \end{table}
 
