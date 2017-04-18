@@ -1,0 +1,24 @@
+\begin{thebibliography}{1}
+
+\bibitem{script}
+Einar Rønquist, Arne~Morten Kvarving, and Eivind Fonn.
+\newblock {Introduction to Supercomputing - TMA4280}.
+\newblock \url{https://wiki.math.ntnu.no/tma4280/2017v/start}, 2017.
+
+\bibitem{task}
+Aurélien Larcher.
+\newblock {Introduction to Supercomputing - TMA4280 - Project II}.
+\newblock \url{https://wiki.math.ntnu.no/tma4280/2017v/start}, 2017.
+
+\bibitem{lille}
+NTNU~HPC GROUP.
+\newblock {Idun}.
+\newblock \url{https://www.hpc.ntnu.no/pages/viewpage.action?pageId=21037127},
+  2017.
+
+\bibitem{ana_comp}
+Bernd Ulmann.
+\newblock {\em Analog computing}.
+\newblock De Gruyter Oldenbourg, Munich, 2013.
+
+\end{thebibliography}

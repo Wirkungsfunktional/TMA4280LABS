@@ -1,0 +1,5 @@
+8
+-25
+--------------------------------------------------------------------------
+mpiexec noticed that process rank 35 with PID 63660 on node compute-1-0-15.foreman.hpc.ntnu.no exited on signal 11 (Segmentation fault).
+--------------------------------------------------------------------------

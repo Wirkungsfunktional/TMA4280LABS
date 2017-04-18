@@ -1,0 +1,5 @@
+7
+-6
+--------------------------------------------------------------------------
+mpiexec noticed that process rank 19 with PID 113228 on node compute-1-0-9.foreman.hpc.ntnu.no exited on signal 6 (Aborted).
+--------------------------------------------------------------------------
