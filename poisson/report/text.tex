@@ -37,12 +37,12 @@ We run the program on Lille with different system sizes and number of processes.
 The error is computed with the maximum norm. We observe in Fig.~\ref{fig:size_err}\begin{figure}[h] 
   \centering
      \includegraphics[width=\textwidth]{pic/size_err.png}
-  \caption{}
+  \caption{Error of the method for different number of processes. Obvious there is almost no difference. The method works as expected.}
   \label{fig:size_err}
 \end{figure} that the error decrease with the step size in order $2$ as we expect. This holds for different number of processes. Furthermore we measured the execution time of the program for different sizes $N$ and number of processes $P$. As we see in Fig.~\ref{fig:size_time}\begin{figure}[h] 
   \centering
      \includegraphics[width=\textwidth]{pic/size_time.png}
-  \caption{}
+  \caption{The run time for different system sizes and number of processes. The runtime scales quadratic with the system size (logarithmic axis).}
   \label{fig:size_time}
 \end{figure} the time increases quadratic in $N$. This is reasonable in reason that the system size increases with $N^2$. We observe for high numbers of processes and low $N$ a bad timing compared to runs with lesser processes, due to the higher communication overhead. 
 
@@ -52,7 +52,7 @@ The error is computed with the maximum norm. We observe in Fig.~\ref{fig:size_er
 We run the program for different choices of the number of MPI--Processes $P$ and OMP--Threads $T$. The condition $PT = 36$ is always satisfied. The results are depcited in \ref{fig:pt}\begin{figure}[h] 
   \centering
      \includegraphics[width=\textwidth]{pic/pt.png}
-  \caption{}
+  \caption{Runtime for different number of processes and threads for the system size $N = 2^14$.}
   \label{fig:pt}
 \end{figure}. We do not observe a great improvement of the run time. This could be due to the possibility that the DFT is the most time consuming subtask of the algorithm. To support this assumption a more detailed analysis should be done.
 
@@ -65,12 +65,12 @@ We run the program for different choices of the number of MPI--Processes $P$ and
 In Fig.~\ref{fig:speedup}\begin{figure}[h] 
   \centering
      \includegraphics[width=\textwidth]{pic/speedup.png}
-  \caption{}
+  \caption{The speed up for different system sizes. We see for small system sizes the speed up does not scale due to the increasing communication effort.}
   \label{fig:speedup}
 \end{figure} the speed up is depicted for several sizes of the system. We observe especially for big sizes am almost ideal speed up. The efficency, depicted in Fig.~\ref{fig:efficency}\begin{figure}[h] 
   \centering
      \includegraphics[width=\textwidth]{pic/efficency.png}
-  \caption{}
+  \caption{The efficiency for different system sizes.}
   \label{fig:efficency}
 \end{figure}, support this. Nevertheless we see that for smaller sizes of the system the communication overhead disturb the possible speed up. Due to Ahmdals law there is no advance in use more processes. But as we can suspect in Fig.\ref{fig:efficency} an increase of the system size and process number holds the efficiency almost constant. So our implementation is scalable. As previous mentioned the run time scales proportional to the system size with $N^2$. To improve the run time one can use more advanced implementation of the FFT. These algorithm runs faster if the size of the input is a power of $2$ unfortunately is the size of our input of size $2^k - 1$. One have to change this restriction to use more efficient a FFT. A possible bottleneck is the need of the transposation. The hole matrix is communicated at once and all processes can not continue before this data is transferred. Fortunately the system is almost load balanced. No process stays for long time idle. Instead of one communication after the FFT, one could pipeline the program in the way that after the of every single row this will be immediately communicated instead of buffering. But we assume that this leads to a higher communication overhead. In reason that we need all--t--all--broadcasting it should lead to improvements to use a suitable network for the processors. The expensive all--with--all--connection would minimize the time, but is for even big numbers of processors almost not realisable. one have to find a good compromise. 
 
@@ -86,7 +86,7 @@ We use as a new function
 The solution is depicted in Fig.~\ref{fig:func_plot}\begin{figure}[h] 
   \centering
      \includegraphics[width=\textwidth]{pic/func_plot.png}
-  \caption{}
+  \caption{The solution for the given right hand function.}
   \label{fig:func_plot}
 \end{figure}. In order to obtain results for different right hand functions we have not to change the parallel implementation scheme. Only the function which fill the right hand matrix have to be changed. Using built-in function like $\sin, \cos \ldots$ can increase the run time of the filling. But the main algorithm remains the same. One have of course to make sure that a solution of the problem exists and is unique.  
 
